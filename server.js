@@ -1,45 +1,40 @@
 // server.js
-
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
 
-// Create an Express app
 const app = express();
-
-// Create an HTTP server using the Express app
 const server = http.createServer(app);
 
-// Attach Socket.IO to the server with CORS configuration
+// Attach Socket.IO with proper CORS configuration
 const io = socketIO(server, {
   cors: {
-    origin: "*", // Allow all origins
+    origin: "*", // Allows connection from any website.
     methods: ["GET", "POST"]
   }
 });
 
-// Serve static files from the "public" folder
+// Serve static files (like index.html, style.css) from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Listen for incoming connections from clients
+// Handle new connections
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  // Listen for chat messages from this socket
+  // When a message is received, broadcast it to everyone
   socket.on('chat message', (msg) => {
-    // Broadcast the message to all clients
     io.emit('chat message', msg);
   });
 
-  // Handle user disconnect
+  // Handle disconnections
   socket.on('disconnect', () => {
     console.log('A user disconnected');
   });
 });
 
-// Use the PORT environment variable provided by Render, with a fallback to 3000
+// Use the port provided by Render, or 3000 for local testing
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
