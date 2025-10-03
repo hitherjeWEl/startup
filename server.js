@@ -11,8 +11,13 @@ const app = express();
 // Create an HTTP server using the Express app
 const server = http.createServer(app);
 
-// Attach Socket.IO to the server
-const io = socketIO(server);
+// Attach Socket.IO to the server with CORS configuration
+const io = socketIO(server, {
+  cors: {
+    origin: "*", // Allow all origins
+    methods: ["GET", "POST"]
+  }
+});
 
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -33,7 +38,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start the server on port 3000
-server.listen(3000,'0.0.0.0', () => {
-  console.log('Server is running on http://localhost:3000');
+// Use the PORT environment variable provided by Render, with a fallback to 3000
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
